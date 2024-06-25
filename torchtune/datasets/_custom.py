@@ -34,6 +34,7 @@ def custom_dataset(
         # load_dataset
         source="csv",
         convert_to_messages=message_converter,
+        split="train",
         # Llama3 does not need a chat format
         chat_format=None,
         max_seq_len=max_seq_len,
