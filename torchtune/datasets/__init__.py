@@ -21,6 +21,8 @@ from torchtune.datasets._text_completion import (
 )
 from torchtune.datasets._wikitext import wikitext_dataset
 
+from torchtune.datasets._custom import custom_dataset
+
 __all__ = [
     "alpaca_dataset",
     "alpaca_cleaned_dataset",
@@ -39,4 +41,5 @@ __all__ = [
     "ConcatDataset",
     "wikitext_dataset",
     "PreferenceDataset",
+    "custom_dataset",
 ]
