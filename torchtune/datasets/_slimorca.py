@@ -8,11 +8,11 @@ from typing import Optional
 
 from torchtune.datasets._chat import chat_dataset, ChatDataset
 
-from torchtune.modules.tokenizers import Tokenizer
+from torchtune.modules.tokenizers import ModelTokenizer
 
 
 def slimorca_dataset(
-    tokenizer: Tokenizer,
+    tokenizer: ModelTokenizer,
     *,
     source: str = "Open-Orca/SlimOrca-Dedup",
     chat_format: Optional[str] = None,
@@ -28,12 +28,12 @@ def slimorca_dataset(
     The Llama3 models do not prescribe a particular format.
 
     The returned data is a tuple of input token id list and label token id
-    list. If `max_seq_len` keyword argument is provided, the returned
+    list. If ``max_seq_len`` keyword argument is provided, the returned
     input token id list is ensured (by truncation if necessary) to be within
     that length.
 
     Args:
-        tokenizer (Tokenizer): Tokenizer used to encode data. Tokenize must implement an `encode` and `decode` method.
+        tokenizer (ModelTokenizer): Tokenizer used by the model that implements the ``tokenize_messages`` method.
         source (str): path string of dataset, anything supported by Hugging Face's `load_dataset`.
         chat_format (Optional[str]): name of template used to format the chat. See the description
             in :class:`~torchtune.datasets.ChatDataset` for more details. Default: None

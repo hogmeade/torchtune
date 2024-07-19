@@ -20,7 +20,7 @@ from torchtune.data import (
     validate_messages,
 )
 from torchtune.datasets._packed import PackedDataset
-from torchtune.modules.tokenizers import Tokenizer
+from torchtune.modules.tokenizers import ModelTokenizer
 
 
 class ChatDataset(Dataset):
@@ -30,7 +30,7 @@ class ChatDataset(Dataset):
     The general flow from loading a sample to tokenized prompt is:
     load sample -> apply transform -> foreach turn{format into template -> tokenize}
 
-    If the column/key names differ from the expected names in the ``ChatFormat``,
+    If the column/key names differ from the expected names in the :class:`~torchtune.data.ChatFormat`,
     then the ``column_map`` argument can be used to provide this mapping.
 
     Use ``convert_to_messages`` to prepare your dataset into the Llama2 chat format
@@ -48,7 +48,7 @@ class ChatDataset(Dataset):
     turns does not fit within ``max_seq_len`` then it is truncated.
 
     Args:
-        tokenizer (Tokenizer): Tokenizer used to encode data. Tokenize must implement an ``encode`` and ``decode`` method.
+        tokenizer (ModelTokenizer): Tokenizer used by the model that implements the ``tokenize_messages`` method.
         source (str): path string of dataset, anything supported by Hugging Face's ``load_dataset``
             (https://huggingface.co/docs/datasets/en/package_reference/loading_methods#datasets.load_dataset.path)
         convert_to_messages (Callable[[Mapping[str, Any]], List[Message]]): function that keys into the desired field in the sample
@@ -67,7 +67,7 @@ class ChatDataset(Dataset):
     def __init__(
         self,
         *,
-        tokenizer: Tokenizer,
+        tokenizer: ModelTokenizer,
         source: str,
         convert_to_messages: Callable[[Mapping[str, Any]], List[Message]],
         chat_format: Optional[ChatFormat] = None,
@@ -111,7 +111,7 @@ class ChatDataset(Dataset):
 
 def chat_dataset(
     *,
-    tokenizer: Tokenizer,
+    tokenizer: ModelTokenizer,
     source: str,
     conversation_style: str,
     chat_format: Optional[str] = None,
@@ -126,18 +126,18 @@ def chat_dataset(
     using :class:`~torchtune.datasets.ChatDataset` directly, as it is made to be config friendly.
 
     Args:
-        tokenizer (Tokenizer): Tokenizer used to encode data. Tokenize must implement an ``encode`` and ``decode`` method.
+        tokenizer (ModelTokenizer): Tokenizer used by the model that implements the ``tokenize_messages`` method.
         source (str): path string of dataset, anything supported by Hugging Face's ``load_dataset``
             (https://huggingface.co/docs/datasets/en/package_reference/loading_methods#datasets.load_dataset.path)
         conversation_style (str): string specifying expected style of conversations in the dataset
             for automatic conversion to the :class:`~torchtune.data.Message` structure. Supported styles are: "sharegpt", "openai"
-        chat_format (Optional[str]): full import path of ``ChatFormat`` class used to format the messages. See the description in
-            :class:`~torchtune.datasets.ChatDataset` for more details. For a list of all possible chat formats,
-            check out :ref:`chat_formats`. Default: None.
+        chat_format (Optional[str]): full import path of :class:`~torchtune.data.ChatFormat` class used to format the messages.
+            See the description in :class:`~torchtune.datasets.ChatDataset` for more details. For a list of all
+            possible chat formats, check out :ref:`chat_formats`. Default: None.
         max_seq_len (int): Maximum number of tokens in the returned input and label token id lists.
         train_on_input (bool): Whether the model is trained on the prompt or not. Default is False.
         packed (bool): Whether or not to pack the dataset to ``max_seq_len`` prior to training. Default is False.
-        **load_dataset_kwargs (Dict[str, Any]): additional keyword arguments to pass to `load_dataset`.
+        **load_dataset_kwargs (Dict[str, Any]): additional keyword arguments to pass to ``load_dataset``.
 
     Examples:
         >>> from torchtune.datasets import chat_dataset
@@ -185,4 +185,8 @@ def chat_dataset(
         train_on_input=train_on_input,
         **load_dataset_kwargs,
     )
-    return PackedDataset(ds, max_seq_len=max_seq_len) if packed else ds
+    return (
+        PackedDataset(ds, max_seq_len=max_seq_len, padding_idx=tokenizer.pad_id)
+        if packed
+        else ds
+    )

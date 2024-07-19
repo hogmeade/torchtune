@@ -9,7 +9,7 @@ from functools import partial
 from torchtune.models.llama2._component_builders import llama2, lora_llama2
 
 from torchtune.modules import TransformerDecoder
-from torchtune.modules.tokenizers import SentencePieceTokenizer
+from torchtune.models.llama2._tokenizer import Llama2Tokenizer
 from torchtune.modules.peft import LORA_ATTN_MODULES
 
 
@@ -39,8 +39,7 @@ def llama2_7b() -> TransformerDecoder:
         norm_eps=1e-5,
     )
 
-
-def llama2_tokenizer(path: str) -> SentencePieceTokenizer:
+def llama2_tokenizer(path: str) -> Llama2Tokenizer:
     """
     Tokenizer for Llama2.
 
@@ -48,12 +47,9 @@ def llama2_tokenizer(path: str) -> SentencePieceTokenizer:
         path (str): path to the tokenizer
 
     Returns:
-        SentencePieceTokenizer: Instantiation of the Llama2 tokenizer
+        Llama2Tokenizer: Instantiation of the Llama2 tokenizer
     """
-    tokenizer = SentencePieceTokenizer(path)
-    # Original tokenizer has no pad_id, which causes indexing errors when batch training
-    tokenizer.pad_id = 0
-    return tokenizer
+    return Llama2Tokenizer(path)
 
 
 def lora_llama2_7b(
@@ -83,6 +79,7 @@ def lora_llama2_7b(
         lora_rank (int): rank of each low-rank approximation
         lora_alpha (float): scaling factor for the low-rank approximation
         quantize_base (bool): Whether to quantize base model weights
+        lora_dropout (float): dropout probability for LoRA linear layers. Default: 0.05
 
     Returns:
         TransformerDecoder: Instantiation of Llama2 7B model with LoRA applied
@@ -162,6 +159,7 @@ def lora_llama2_13b(
             Default: False
         lora_rank (int): rank of each low-rank approximation
         lora_alpha (float): scaling factor for the low-rank approximation
+        lora_dropout (float): dropout probability for LoRA linear layers. Default: 0.05
         quantize_base (bool): Whether to quantize base model weights
 
     Returns:
@@ -243,6 +241,7 @@ def lora_llama2_70b(
             Default: False
         lora_rank (int): rank of each low-rank approximation
         lora_alpha (float): scaling factor for the low-rank approximation
+        lora_dropout (float): dropout probability for LoRA linear layers. Default: 0.05
         quantize_base (bool): Whether to quantize base model weights
 
     Returns:
