@@ -3,9 +3,12 @@ from torchtune.datasets import ChatDataset
 from torchtune.data import Message
 from typing import Mapping, Any, List
 
+from torchtune.datasets._packed import PackedDataset
+
 def message_converter(sample: Mapping[str, Any], train_on_input: bool) -> List[Message]:
     input_msg = sample["input"]
     output_msg = sample["output"]
+    # print(input_msg, output_msg)
 
     user_message = Message(
         role="user",
@@ -28,7 +31,7 @@ def custom_dataset(
     max_seq_len: int = 2048,  # You can expose this if you want to experiment
 ) -> ChatDataset:
 
-    return ChatDataset(
+    ds = ChatDataset(
         tokenizer=tokenizer,
         # For local csv files, we specify "csv" as the source, just like in
         # load_dataset
@@ -42,3 +45,5 @@ def custom_dataset(
         # load_dataset
         data_files="/home/lib/code/llm/llama3/input_file.csv",
     )
+    # return PackedDataset(ds, max_seq_len=max_seq_len)
+    return ds
